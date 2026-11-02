@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -47,6 +48,11 @@ public class GlobalExceptionHandler {
         ApiError body = new ApiError(LocalDateTime.now(), status.value(),
                 status.getReasonPhrase(), message, req.getRequestURI());
         return ResponseEntity.status(status).body(body);
+    }
+    
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiError> integrity(DataIntegrityViolationException ex, HttpServletRequest req) {
+        return build(HttpStatus.CONFLICT, "Data conflicts with an existing record", req);
     }
 }
 
